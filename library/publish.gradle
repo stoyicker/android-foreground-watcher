@@ -22,8 +22,6 @@ task javadocJar(type: Jar) {
 }
 
 apply plugin: "maven-publish"
-apply plugin: "com.jfrog.bintray"
-
 publishing {
   publications {
     library(MavenPublication) {
