@@ -1,0 +1,31 @@
+plugins {
+  id "com.android.application" version "$_gradlePluginVersion"
+}
+
+final def useGit = System.env.CI != null && "which git".execute().waitFor() == 0
+android {
+  buildToolsVersion _buildToolsVersion
+  compileSdkVersion _compileSdkVersion.toInteger()
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+  defaultConfig {
+    minSdkVersion 1
+    targetSdkVersion 30
+    versionCode useGit ? "git rev-list --count HEAD".execute().text.toInteger() : Integer.MAX_VALUE
+    versionName useGit ? "git describe --abbrev=0".execute().text.trim() : String.valueOf(versionCode)
+    resConfigs "en"
+  }
+  variantFilter {
+    if (it.buildType.name == "release") {
+      it.ignore = true
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
