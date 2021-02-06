@@ -1,0 +1,47 @@
+name: assert
+
+on: push
+
+jobs:
+  Android_lint_library:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run
+        run: ./gradlew library:lint
+  Assemble_library:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Assemble
+        run: ./gradlew library:assemble
+  Assemble_sample:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Assemble
+        run: ./gradlew sample:assemble
+  Generate_library_javadoc:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Generate javadoc
+        run: ./gradlew library:javadoc
+  Run_non-instrumented_library_tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: ./gradlew library:test
+  Run_non-instrumented_sample_tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: ./gradlew sample:test
