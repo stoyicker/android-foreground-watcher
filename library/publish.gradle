@@ -1,0 +1,70 @@
+project.version = "git describe --abbrev=0".execute().text.trim()
+if (project.version == "") {
+  project.version = "NO-VERSION"
+}
+
+task sourcesJar(type: Jar) {
+  group = JavaBasePlugin.DOCUMENTATION_GROUP
+  description = "Assembles a sources JAR"
+  archiveClassifier.set("sources")
+  archiveFileName = "${project.name}-sources.jar"
+  from android.sourceSets.main.java.srcDirs
+}
+
+task javadocJar(type: Jar) {
+  group = JavaBasePlugin.DOCUMENTATION_GROUP
+  description = "Assembles a javadoc JAR"
+  archiveClassifier.set("javadoc")
+  archiveFileName = "${project.name}-javadoc.jar"
+  // As of right now there is no support for extracting javadoc from an AAR,
+  // so publish the sources JAR as javadoc since it includes javadoc
+  from android.sourceSets.main.java.srcDirs
+}
+
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.bintray"
+
+publishing {
+  publications {
+    library(MavenPublication) {
+      artifactId project.name
+      version project.version
+      artifact "${project.buildDir}/outputs/aar/library-release.aar"
+      artifact sourcesJar
+      artifact javadocJar
+      groupId "com.github.stoyicker.${System.env.GITHUB_REPOSITORY.substring(System.env.GITHUB_REPOSITORY.lastIndexOf("/") + 1)}"
+      pom {
+        name = project.name
+        description = project.name
+        url = "https://github.com/$System.env.GITHUB_REPOSITORY"
+        licenses {
+          license {
+            name = "MIT"
+            url = "https://opensource.org/licenses/MIT"
+          }
+        }
+        developers {
+          developer {
+            id = "stoyicker"
+            name = "Jorge Antonio Diaz-Benito Soriano"
+            email = "jorge.diazbenitosoriano@gmail.com"
+          }
+        }
+        scm {
+          connection = "scm:git:https://github.com/$System.env.GITHUB_REPOSITORY"
+          developerConnection = "scm:git:ssh:git@github.com:$System.env.GITHUB_REPOSITORY"
+          url = "https://github.com/$System.env.GITHUB_REPOSITORY"
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+      credentials {
+        username = "$System.env.OSS_USER"
+        password = "$System.env.OSS_PASSWORD"
+      }
+    }
+  }
+}
