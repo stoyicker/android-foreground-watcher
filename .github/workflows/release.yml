@@ -1,0 +1,42 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  Create_github_release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run
+        uses: zendesk/action-create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+  Attach_library_to_release:
+    needs: Create_github_release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build
+        run: ./gradlew library:assemble
+      - name: Run
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: library/built/outputs/aar/library-release.aar
+          asset_name: library.aar
+          tag: ${{ github.ref }}
+  Publish_library_to_maven_repository:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run
+        run: ./gradlew library:publishLibraryPublicationToMavenRepository
