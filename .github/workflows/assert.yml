@@ -1,6 +1,11 @@
 name: assert
 
-on: push
+on:
+  schedule:
+    - cron: 0 8 * * 4
+  push:
+    branches: 
+      - '*'
 
 jobs:
   Android_lint_library:
